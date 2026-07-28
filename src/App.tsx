@@ -123,7 +123,7 @@ export default function App() {
             className="btn btn-ghost btn-icon"
             onClick={toggle}
             aria-label="切换主题"
-            title={mode === 'dark' ? '切换浅色' : '切换深色'}
+            data-tip={mode === 'dark' ? '切换浅色' : '切换深色'}
           >
             {mode === 'dark' ? <IconSun /> : <IconMoon />}
           </button>

@@ -1229,6 +1229,21 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   outline: none;
 }
 
+/* Force recharts default tooltip to follow the active theme. Fixes dark-mode
+   black text: text now uses --text (white in dark), bg/border use surface vars.
+   The value span keeps its series color via recharts' own inline style. */
+.chart-wrap .recharts-default-tooltip {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  box-shadow: var(--shadow) !important;
+}
+.chart-wrap .recharts-default-tooltip .recharts-tooltip-label,
+.chart-wrap .recharts-default-tooltip .recharts-tooltip-item {
+  color: var(--text) !important;
+}
+
 .chart-tip {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1409,3 +1424,44 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
 
 /* Pseudo-element (::before) + text: margin on ::before */
 .no-flex-gap .toast::before { margin-right: 8px; }
+
+/* ---------------- Theme-aware icon tooltip (replaces native title) ----------------
+   Native `title` tooltips can't be themed via CSS and render black text on the
+   dark background in dark mode. This custom tooltip uses --surface/--text so it
+   auto-adapts (light text on dark surface in dark mode, dark on light in light mode). */
+[data-tip] {
+  position: relative;
+}
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  z-index: 60;
+}
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+/* Keep the tooltip on-screen for edge icons (e.g. header right actions) */
+.app-header .head-actions [data-tip]::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}

@@ -409,18 +409,17 @@ export default function Dashboard({ records, target, onTargetChange }: Props) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={42}
+                  innerRadius={44}
                   outerRadius={70}
                   paddingAngle={3}
                   stroke="none"
-                  label={(d: any) => `${d.name} ${d.value}`}
-                  labelLine={false}
                 >
                   {distData.map((d) => (
                     <Cell key={d.key} fill={periodColor(d.key)} />
                   ))}
                 </Pie>
                 <Tooltip
+                  formatter={(v: any, n: any) => [`${v} 次`, `${n}`]}
                   contentStyle={{ background: palette.tipBg, border: `1px solid ${palette.tipBorder}`, borderRadius: 10, fontSize: 12, color: palette.tipText }}
                 />
               </PieChart>
