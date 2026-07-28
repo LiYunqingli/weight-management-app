@@ -193,7 +193,7 @@ export default function Profile({ profile, onProfileChange, records, onDataChang
         </div>
         <div className="kv">
           <span className="k">版本</span>
-          <span className="v">2.0.0</span>
+          <span className="v">1.0.0</span>
         </div>
         <div className="kv">
           <span className="k">数据存储</span>
