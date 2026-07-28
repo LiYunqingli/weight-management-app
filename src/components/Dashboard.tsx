@@ -409,8 +409,8 @@ export default function Dashboard({ records, target, onTargetChange }: Props) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={44}
-                  outerRadius={70}
+                  innerRadius={28}
+                  outerRadius={48}
                   paddingAngle={3}
                   stroke="none"
                 >
