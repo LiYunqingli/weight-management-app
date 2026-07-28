@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, generateSampleRecords } from './db'
+import { db, generateSampleRecords, generateSampleWater } from './db'
 import { useProfile } from './settings'
 import { useTheme } from './lib/theme'
 import { pushWidgetSnapshot, consumeWidgetTab } from './lib/widget'
@@ -9,6 +9,7 @@ import Overview from './components/Overview'
 import RecordsList from './components/RecordsList'
 import Dashboard from './components/Dashboard'
 import Profile from './components/Profile'
+import Water from './components/Water'
 import AddRecordForm from './components/AddRecordForm'
 import Modal from './components/ui/Modal'
 import {
@@ -19,14 +20,16 @@ import {
   IconPlus,
   IconSun,
   IconMoon,
+  IconDroplet,
 } from './components/ui/icons'
 
-type TabKey = 'overview' | 'records' | 'analysis' | 'me'
+type TabKey = 'overview' | 'records' | 'analysis' | 'me' | 'water'
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'overview', label: '概览', icon: <IconHome /> },
   { key: 'records', label: '记录', icon: <IconList /> },
   { key: 'analysis', label: '分析', icon: <IconChart /> },
+  { key: 'water', label: '喝水', icon: <IconDroplet /> },
   { key: 'me', label: '我的', icon: <IconUser /> },
 ]
 
@@ -45,6 +48,19 @@ export default function App() {
       const count = await db.records.count()
       if (count === 0) {
         await db.records.bulkAdd(generateSampleRecords(14))
+      }
+      localStorage.setItem(KEY, '1')
+    })()
+  }, [])
+
+  // 首次启动：饮水表示例数据（独立 key，不影响体重示例数据）
+  useEffect(() => {
+    const KEY = 'wm_water_seeded_v1'
+    if (localStorage.getItem(KEY)) return
+    ;(async () => {
+      const count = await db.waters.count()
+      if (count === 0) {
+        await db.waters.bulkAdd(generateSampleWater(14))
       }
       localStorage.setItem(KEY, '1')
     })()
@@ -148,6 +164,7 @@ export default function App() {
             onTargetChange={(v) => patchProfile({ target: v })}
           />
         )}
+        {active === 'water' && <Water />}
         {active === 'me' && (
           <Profile
             profile={profile}

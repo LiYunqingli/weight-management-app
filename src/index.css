@@ -36,6 +36,13 @@
   --c-noon: #3f8f5c;
   --c-evening: #9b4d6f;
 
+  /* ---- Water feature (teal — stays blue-free per brand) ---- */
+  --water: #1f8a7a;
+  --water-2: #25a08c;
+  --water-press: #156a5e;
+  --water-soft: #e1f1ee;
+  --water-soft-2: #cfe9e4;
+
   /* ---- Effects ---- */
   --radius-sm: 10px;
   --radius: 16px;
@@ -80,6 +87,12 @@
   --c-morning: #e6a94e;
   --c-noon: #5bb47a;
   --c-evening: #c07496;
+
+  --water: #2bb6a3;
+  --water-2: #34cdb8;
+  --water-press: #1f8a7a;
+  --water-soft: rgba(43, 182, 163, 0.16);
+  --water-soft-2: rgba(43, 182, 163, 0.24);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
@@ -1464,4 +1477,144 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   left: auto;
   right: 0;
   transform: none;
+}
+
+/* =====================================================================
+   Water feature — teal palette, blue-free, matches the design system
+   ===================================================================== */
+
+.hero.water {
+  background: linear-gradient(145deg, #156a5e 0%, #1f8a7a 52%, #156a5e 100%);
+  box-shadow: 0 12px 26px rgba(31, 138, 122, 0.26);
+}
+:root[data-theme='dark'] .hero.water {
+  background: linear-gradient(145deg, #0e4039 0%, #176b5f 55%, #0c352f 100%);
+}
+.hero.water .hero-delta {
+  background: rgba(255, 255, 255, 0.18);
+}
+.hero.water .hero-delta.up {
+  background: rgba(255, 155, 151, 0.26);
+}
+.hero.water .hero-delta.down {
+  background: rgba(111, 224, 168, 0.22);
+}
+
+/* 喝一杯 — primary water CTA */
+.water-cta {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(140deg, var(--water) 0%, var(--water-2) 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 10px 22px rgba(31, 138, 122, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+.water-cta:active {
+  transform: scale(0.97);
+}
+.water-cta svg {
+  width: 22px;
+  height: 22px;
+}
+:root[data-theme='dark'] .water-cta {
+  box-shadow: 0 10px 22px rgba(43, 182, 163, 0.32);
+}
+
+/* 轻量文字按钮（自定义饮水） */
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.link-btn.water {
+  color: var(--water);
+}
+.link-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* 可选预设胶囊（水杯容量 / 每日目标） */
+.preset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.1s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+.preset:active {
+  transform: scale(0.96);
+}
+.preset.on {
+  background: var(--water-soft);
+  color: var(--water);
+  border-color: transparent;
+}
+
+/* 饮水进度条（历史每日 vs 目标） */
+.progress.water > span {
+  background: linear-gradient(90deg, var(--water), var(--water-2));
+}
+
+/* 每日饮水行 */
+.wday {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--border);
+}
+.wday:last-child {
+  border-bottom: none;
+}
+.wday-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.wday-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.wday-total {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.wday-total .suf {
+  color: var(--text-3);
+  font-weight: 500;
+  margin-left: 2px;
+  font-size: 11px;
+}
+.wday-meta {
+  font-size: 11.5px;
+  color: var(--text-3);
 }
