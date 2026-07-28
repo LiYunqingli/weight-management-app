@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import type { WeightRecord } from '../db'
-import { db, generateSampleRecords } from '../db'
+import { db, generateSampleRecords, generateSampleWater } from '../db'
 import { exportToCSV, exportToJSON, parseCSV } from '../utils'
 import { useToast } from '../lib/toast'
 import Button from './ui/Button'
 import Modal from './ui/Modal'
-import { IconDownload, IconUpload, IconTrash } from './ui/icons'
+import { IconDownload, IconUpload, IconTrash, IconDroplet } from './ui/icons'
 
 interface Props {
   records: WeightRecord[]
@@ -17,6 +18,8 @@ export default function DataManagement({ records, onChanged }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [importing, setImporting] = useState(false)
   const [clearing, setClearing] = useState(false)
+  // 饮水记录数（实时），用于「示例与维护」的关联统计
+  const waterCount = useLiveQuery(() => db.waters.count(), []) ?? 0
 
   const handleExportCSV = () => {
     if (!records.length) return toast.warning('当前没有可导出的数据')
@@ -32,14 +35,21 @@ export default function DataManagement({ records, onChanged }: Props) {
 
   const handleSample = async () => {
     const samples = generateSampleRecords(14)
-    await db.records.bulkAdd(samples)
-    toast.success(`已生成 ${samples.length} 条示例数据`)
+    const waterSamples = generateSampleWater(14)
+    await db.transaction('rw', db.records, db.waters, async () => {
+      await db.records.bulkAdd(samples)
+      await db.waters.bulkAdd(waterSamples)
+    })
+    toast.success(`已生成 ${samples.length} 条体重 + ${waterSamples.length} 条饮水示例`)
     onChanged()
   }
 
   const handleClear = async () => {
-    await db.records.clear()
-    toast.success('已清空全部数据')
+    await db.transaction('rw', db.records, db.waters, async () => {
+      await db.records.clear()
+      await db.waters.clear()
+    })
+    toast.success('已清空全部数据（体重 + 饮水）')
     setClearing(false)
     onChanged()
   }
@@ -121,8 +131,17 @@ export default function DataManagement({ records, onChanged }: Props) {
         </div>
         <hr className="divider" />
         <div className="kv">
-          <span className="k">当前记录数</span>
+          <span className="k">体重记录</span>
           <span className="v tnum">{records.length} 条</span>
+        </div>
+        <div className="kv">
+          <span className="k">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <IconDroplet style={{ width: 14, height: 14, color: 'var(--water)' }} />
+              饮水记录
+            </span>
+          </span>
+          <span className="v tnum">{waterCount} 条</span>
         </div>
       </div>
 
@@ -144,7 +163,7 @@ export default function DataManagement({ records, onChanged }: Props) {
         }
       >
         <p className="muted" style={{ fontSize: 14, margin: '4px 0 0' }}>
-          此操作将删除全部 {records.length} 条记录，且不可恢复。建议先导出备份。
+          此操作将删除全部 {records.length} 条体重记录与 {waterCount} 条饮水记录，且不可恢复。建议先导出备份。
         </p>
       </Modal>
     </div>
