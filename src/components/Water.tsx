@@ -10,10 +10,12 @@ import Button from './ui/Button'
 import Modal from './ui/Modal'
 import ProgressRing from './ui/ProgressRing'
 import Empty from './ui/Empty'
-import { IconDroplet, IconPlus, IconTrash, IconCheck, IconCalendar } from './ui/icons'
+import { IconDroplet, IconPlus, IconTrash, IconCheck, IconCalendar, IconChevronRight } from './ui/icons'
 
 const CUP_PRESETS = [200, 250, 300, 350, 500]
 const GOAL_PRESETS = [1500, 2000, 2500, 3000]
+const TODAY_LIMIT = 5 // 今日记录默认展示条数，超出折叠
+const HISTORY_LIMIT = 7 // 历史记录默认展示天数，超出折叠
 
 interface DailyTotal {
   key: string
@@ -66,6 +68,9 @@ export default function Water() {
   const [customOpen, setCustomOpen] = useState(false)
   const [customAmount, setCustomAmount] = useState(String(settings.cupMl))
   const [customTime, setCustomTime] = useState(toLocalInput(Date.now()))
+  const [showAllToday, setShowAllToday] = useState(false)
+  const [showAllHistory, setShowAllHistory] = useState(false)
+  const [dayDetail, setDayDetail] = useState<DailyTotal | null>(null)
 
   const goal = settings.goalMl
 
@@ -106,6 +111,20 @@ export default function Water() {
         .filter((w) => dayKey(w.timestamp) === todayKey)
         .sort((a, b) => b.timestamp - a.timestamp),
     [waters, todayKey],
+  )
+
+  // 折叠展示：超出上限后隐藏，由「查看全部」展开
+  const shownToday = showAllToday ? todayList : todayList.slice(0, TODAY_LIMIT)
+  const shownHistory = showAllHistory ? history : history.slice(0, HISTORY_LIMIT)
+  // 单日明细：点击某一天查看当天完整饮水记录
+  const dayRecords = useMemo(
+    () =>
+      dayDetail
+        ? waters
+            .filter((w) => dayKey(w.timestamp) === dayDetail.key)
+            .sort((a, b) => b.timestamp - a.timestamp)
+        : [],
+    [waters, dayDetail],
   )
 
   const adjustCup = (delta: number) => {
@@ -152,6 +171,33 @@ export default function Water() {
       toast.error('记录失败，请重试')
     }
   }
+
+  // 单条饮水记录行（今日列表与单日明细弹层共用）
+  const renderCup = (w: WaterRecord) => (
+    <div className="record" key={w.id}>
+      <div
+        className="record-dot"
+        style={{ background: 'linear-gradient(140deg, var(--water-2), var(--water-press))' }}
+      >
+        <IconDroplet />
+      </div>
+      <div className="record-main">
+        <div className="record-weight tnum">
+          {w.amount}
+          <span className="suf">ml</span>
+        </div>
+        <div className="record-meta">
+          {formatTime(w.timestamp)}
+          {w.note ? ` · ${w.note}` : ''}
+        </div>
+      </div>
+      <div className="record-actions">
+        <button className="act danger" onClick={() => removeCup(w.id)} aria-label="删除">
+          <IconTrash />
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div>
@@ -300,33 +346,14 @@ export default function Water() {
           </div>
         ) : (
           <div style={{ padding: '0 16px 8px' }}>
-            {todayList.map((w) => (
-              <div className="record" key={w.id}>
-                <div
-                  className="record-dot"
-                  style={{
-                    background: 'linear-gradient(140deg, var(--water-2), var(--water-press))',
-                  }}
-                >
-                  <IconDroplet />
-                </div>
-                <div className="record-main">
-                  <div className="record-weight tnum">
-                    {w.amount}
-                    <span className="suf">ml</span>
-                  </div>
-                  <div className="record-meta">
-                    {formatTime(w.timestamp)}
-                    {w.note ? ` · ${w.note}` : ''}
-                  </div>
-                </div>
-                <div className="record-actions">
-                  <button className="act danger" onClick={() => removeCup(w.id)} aria-label="删除">
-                    <IconTrash />
-                  </button>
-                </div>
+            {shownToday.map(renderCup)}
+            {todayList.length > TODAY_LIMIT && (
+              <div className="row" style={{ justifyContent: 'center' }}>
+                <button className="link-btn water" onClick={() => setShowAllToday((v) => !v)}>
+                  {showAllToday ? '收起' : `查看全部 ${todayList.length} 杯`}
+                </button>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
@@ -345,30 +372,54 @@ export default function Water() {
               <Empty icon={<IconDroplet />} text="暂无历史记录" />
             </div>
           ) : (
-            history.map((d) => {
-              const p =
-                goal != null
-                  ? Math.max(0, Math.min(1, d.total / goal))
-                  : Math.min(1, d.total / 2500)
-              const met = goal != null && d.total >= goal
-              return (
-                <div className="wday" key={d.key}>
-                  <div className="wday-top">
-                    <span className="wday-date">{relativeDay(d.date)}</span>
-                    <span className="wday-total tnum">
-                      {d.total}
-                      <span className="suf">ml</span>
-                    </span>
+            <>
+              {shownHistory.map((d) => {
+                const p =
+                  goal != null
+                    ? Math.max(0, Math.min(1, d.total / goal))
+                    : Math.min(1, d.total / 2500)
+                const met = goal != null && d.total >= goal
+                return (
+                  <div
+                    className="wday clickable"
+                    key={d.key}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setDayDetail(d)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setDayDetail(d)
+                      }
+                    }}
+                  >
+                    <div className="wday-top">
+                      <span className="wday-date">{relativeDay(d.date)}</span>
+                      <span className="wday-right">
+                        <span className="wday-total tnum">
+                          {d.total}
+                          <span className="suf">ml</span>
+                        </span>
+                        <IconChevronRight style={{ width: 16, height: 16, color: 'var(--text-3)' }} />
+                      </span>
+                    </div>
+                    <div className="progress water">
+                      <span style={{ width: `${Math.round(p * 100)}%` }} />
+                    </div>
+                    <div className="wday-meta">
+                      {d.cups} 杯{goal != null && met ? ' · 已达标 ✓' : ''}
+                    </div>
                   </div>
-                  <div className="progress water">
-                    <span style={{ width: `${Math.round(p * 100)}%` }} />
-                  </div>
-                  <div className="wday-meta">
-                    {d.cups} 杯{goal != null && met ? ' · 已达标 ✓' : ''}
-                  </div>
+                )
+              })}
+              {history.length > HISTORY_LIMIT && (
+                <div className="row" style={{ justifyContent: 'center', paddingTop: 4 }}>
+                  <button className="link-btn water" onClick={() => setShowAllHistory((v) => !v)}>
+                    {showAllHistory ? '收起' : `查看全部 ${history.length} 天`}
+                  </button>
                 </div>
-              )
-            })
+              )}
+            </>
           )}
         </div>
       </div>
@@ -408,6 +459,38 @@ export default function Water() {
           <div className="stat-sub">单日最高 ml</div>
         </div>
       </div>
+
+      {/* 单日完整饮水记录 */}
+      <Modal
+        open={dayDetail != null}
+        onClose={() => setDayDetail(null)}
+        title={dayDetail ? `${relativeDay(dayDetail.date)} · 饮水明细` : '饮水明细'}
+      >
+        {dayDetail && (
+          <div>
+            <div className="row" style={{ justifyContent: 'space-between', marginBottom: 4 }}>
+              <div>
+                <div className="stat-value tnum" style={{ fontSize: 24 }}>
+                  {dayDetail.total}
+                  <span className="suf">ml</span>
+                </div>
+                <div className="stat-sub">
+                  {dayDetail.cups} 杯
+                  {goal != null && dayDetail.total >= goal ? ' · 已达标 ✓' : ''}
+                </div>
+              </div>
+            </div>
+            <hr className="divider" />
+            {dayRecords.length === 0 ? (
+              <div style={{ padding: '14px 0' }}>
+                <Empty icon={<IconDroplet />} text="当天暂无记录" />
+              </div>
+            ) : (
+              <div>{dayRecords.map(renderCup)}</div>
+            )}
+          </div>
+        )}
+      </Modal>
 
       {/* 自定义饮水弹层 */}
       <Modal
