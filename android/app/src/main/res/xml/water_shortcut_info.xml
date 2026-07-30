@@ -6,5 +6,9 @@
     android:minResizeHeight="40dp"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/water_shortcut"
+    android:previewLayout="@layout/water_shortcut"
+    android:previewImage="@drawable/widget_bg_water"
+    android:label="@string/water_shortcut_label"
+    android:description="@string/water_shortcut_label"
     android:resizeMode="none"
     android:widgetCategory="home_screen" />

@@ -37,6 +37,7 @@
         <!-- 桌面小组件：体重 -->
         <receiver
             android:name=".WeightWidgetProvider"
+            android:label="@string/weight_widget_label"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -49,6 +50,7 @@
         <!-- 桌面小组件：喝水展示 -->
         <receiver
             android:name=".WaterWidgetProvider"
+            android:label="@string/water_widget_label"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -61,6 +63,7 @@
         <!-- 桌面小组件：喝水「喝一杯」快捷（1×1 图标） -->
         <receiver
             android:name=".WaterShortcutWidgetProvider"
+            android:label="@string/water_shortcut_label"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

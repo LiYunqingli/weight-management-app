@@ -6,5 +6,9 @@
     android:minResizeHeight="40dp"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/water_widget"
+    android:previewLayout="@layout/water_widget"
+    android:previewImage="@drawable/widget_bg_water"
+    android:label="@string/water_widget_label"
+    android:description="@string/water_widget_label"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />

@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">体重管理</string>
     <string name="title_activity_main">体重管理</string>
+    <string name="weight_widget_label">体重追踪</string>
+    <string name="water_widget_label">喝水追踪</string>
+    <string name="water_shortcut_label">喝一杯</string>
     <string name="package_name">com.weighttracker.app</string>
     <string name="custom_url_scheme">com.weighttracker.app</string>
 </resources>
