@@ -21,16 +21,24 @@ export default function DataManagement({ records, onChanged }: Props) {
   // 饮水记录数（实时），用于「示例与维护」的关联统计
   const waterCount = useLiveQuery(() => db.waters.count(), []) ?? 0
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     if (!records.length) return toast.warning('当前没有可导出的数据')
-    exportToCSV(records)
-    toast.success('CSV 已导出')
+    try {
+      const fileName = await exportToCSV(records)
+      toast.success(`已导出到「文档」目录：${fileName}`)
+    } catch (e) {
+      toast.error('导出失败：' + (e as Error).message)
+    }
   }
 
-  const handleExportJSON = () => {
+  const handleExportJSON = async () => {
     if (!records.length) return toast.warning('当前没有可导出的数据')
-    exportToJSON(records)
-    toast.success('JSON 已导出')
+    try {
+      const fileName = await exportToJSON(records)
+      toast.success(`已导出到「文档」目录：${fileName}`)
+    } catch (e) {
+      toast.error('导出失败：' + (e as Error).message)
+    }
   }
 
   const handleSample = async () => {

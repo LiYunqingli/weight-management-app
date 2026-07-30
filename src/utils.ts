@@ -1,5 +1,7 @@
 import dayjs from 'dayjs'
 import { saveAs } from 'file-saver'
+import { Capacitor } from '@capacitor/core'
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 import type { WeightRecord, Period, MealStatus } from './db'
 import { PERIOD_LABELS, MEAL_LABELS, getPeriodFromDate } from './db'
 
@@ -220,9 +222,13 @@ function csvCell(v: string | number): string {
   return `"${String(v).replace(/"/g, '""')}"`
 }
 
-/** 导出 CSV（带 BOM，Excel 中文不乱码） */
-export function exportToCSV(records: WeightRecord[]) {
-  if (!records.length) return
+/**
+ * 导出 CSV（带 BOM，Excel 中文不乱码）。
+ * 原生平台（Capacitor/Android/iOS）写入系统公共「文档」目录，Web 平台走浏览器下载。
+ * 返回生成的文件名，供调用方做真实结果反馈。
+ */
+export async function exportToCSV(records: WeightRecord[]): Promise<string> {
+  if (!records.length) throw new Error('没有可导出的数据')
   const header = ['id', 'weight', 'bodyFat', 'date', 'time', 'period', 'mealStatus', 'note']
   const rows = toExportRows(records).map((r) =>
     [r.id, r.weight, r.bodyFat, r.date, r.time, r.period, r.mealStatus, r.note]
@@ -230,16 +236,40 @@ export function exportToCSV(records: WeightRecord[]) {
       .join(','),
   )
   const csv = [header.map(csvCell).join(','), ...rows].join('\r\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  saveAs(blob, `体重数据_${dayjs().format('YYYYMMDD_HHmm')}.csv`)
+  const fileName = `体重数据_${dayjs().format('YYYYMMDD_HHmm')}.csv`
+  if (Capacitor.isNativePlatform()) {
+    await Filesystem.writeFile({
+      path: fileName,
+      data: '\uFEFF' + csv,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+      recursive: true,
+    })
+  } else {
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    saveAs(blob, fileName)
+  }
+  return fileName
 }
 
-/** 导出 JSON */
-export function exportToJSON(records: WeightRecord[]) {
-  if (!records.length) return
+/** 导出 JSON。平台分支同 exportToCSV。 */
+export async function exportToJSON(records: WeightRecord[]): Promise<string> {
+  if (!records.length) throw new Error('没有可导出的数据')
   const data = JSON.stringify(records, null, 2)
-  const blob = new Blob([data], { type: 'application/json;charset=utf-8;' })
-  saveAs(blob, `体重数据_${dayjs().format('YYYYMMDD_HHmm')}.json`)
+  const fileName = `体重数据_${dayjs().format('YYYYMMDD_HHmm')}.json`
+  if (Capacitor.isNativePlatform()) {
+    await Filesystem.writeFile({
+      path: fileName,
+      data,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+      recursive: true,
+    })
+  } else {
+    const blob = new Blob([data], { type: 'application/json;charset=utf-8;' })
+    saveAs(blob, fileName)
+  }
+  return fileName
 }
 
 /**
