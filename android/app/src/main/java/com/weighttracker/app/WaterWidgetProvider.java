@@ -160,11 +160,15 @@ public class WaterWidgetProvider extends AppWidgetProvider {
         views.setViewVisibility(R.id.w_add_row, View.VISIBLE);
         views.setTextViewText(R.id.w_add, "喝一杯 +" + cupMl + "ml");
 
-        Intent add = new Intent(ACTION_ADD_WATER);
+        // 关键修复：Android 12+(API31+) 会静默丢弃「发往未导出接收器的隐式广播 PendingIntent」，
+        // 导致点击毫无反应。改用显式组件 Intent（仍带上 action 以便接收器校验），确保一定能送达。
+        // 同时把点击挂到 w_add_row（根布局的直接子View，比深层 w_add 更可靠）。
+        Intent add = new Intent(context, WaterAddCupReceiver.class);
+        add.setAction(ACTION_ADD_WATER);
         PendingIntent piAdd = PendingIntent.getBroadcast(
             context, 1, add,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        views.setOnClickPendingIntent(R.id.w_add, piAdd);
+        views.setOnClickPendingIntent(R.id.w_add_row, piAdd);
       } else {
         views.setViewVisibility(R.id.w_add_row, View.GONE);
       }

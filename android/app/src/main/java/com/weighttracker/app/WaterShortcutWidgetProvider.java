@@ -52,8 +52,9 @@ public class WaterShortcutWidgetProvider extends AppWidgetProvider {
       int cups = sp.getInt("w_cups", 0);
       views.setTextViewText(R.id.w_short_cups, String.valueOf(cups));
 
-      // 点按即 +1 杯（与展示小组件同一广播）
-      Intent add = new Intent(WaterWidgetProvider.ACTION_ADD_WATER);
+      // 点按即 +1 杯（与展示小组件同一广播）。同样用显式组件 Intent，避免 Android 12+ 静默丢弃。
+      Intent add = new Intent(context, WaterAddCupReceiver.class);
+      add.setAction(WaterWidgetProvider.ACTION_ADD_WATER);
       PendingIntent piAdd = PendingIntent.getBroadcast(
           context, 2, add,
           PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

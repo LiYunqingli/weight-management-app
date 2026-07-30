@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -22,7 +23,17 @@ public class WaterAddCupReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    if (intent == null || !ACTION.equals(intent.getAction())) return;
+    // 接受「action 匹配」或「显式指向本接收器组件」两种触发方式，确保一定能进入处理逻辑
+    boolean matched = false;
+    if (intent != null) {
+      if (ACTION.equals(intent.getAction())) {
+        matched = true;
+      } else if (intent.getComponent() != null
+          && WaterAddCupReceiver.class.getName().equals(intent.getComponent().getClassName())) {
+        matched = true;
+      }
+    }
+    if (!matched) return;
     try {
       SharedPreferences sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
       SharedPreferences.Editor ed = sp.edit();
@@ -48,6 +59,9 @@ public class WaterAddCupReceiver extends BroadcastReceiver {
       ed.putString("w_updated", String.valueOf(System.currentTimeMillis()));
       ed.apply();
 
+      Log.d("WaterAddCupReceiver", "加水 +" + cupMl + "ml，杯数=" + cups + "，pending=" + pending
+          + "，appRunning=" + (MainActivity.instance != null));
+
       // 即时刷新两个小组件（即使 App 已死也能看到 +1）
       WaterWidgetProvider.pushUpdate(context);
       WaterShortcutWidgetProvider.pushUpdate(context);
@@ -57,6 +71,7 @@ public class WaterAddCupReceiver extends BroadcastReceiver {
         MainActivity.instance.consumeCupsFromWidget();
       }
     } catch (Throwable t) {
+      Log.e("WaterAddCupReceiver", "处理加水广播异常", t);
       // 任何异常都绝不能让广播接收拖垮系统
     }
   }
