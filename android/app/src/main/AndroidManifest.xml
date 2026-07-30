@@ -34,7 +34,7 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- 桌面小组件 -->
+        <!-- 桌面小组件：体重 -->
         <receiver
             android:name=".WeightWidgetProvider"
             android:exported="true">
@@ -44,6 +44,39 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/weight_widget_info" />
+        </receiver>
+
+        <!-- 桌面小组件：喝水展示 -->
+        <receiver
+            android:name=".WaterWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/water_widget_info" />
+        </receiver>
+
+        <!-- 桌面小组件：喝水「喝一杯」快捷（1×1 图标） -->
+        <receiver
+            android:name=".WaterShortcutWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/water_shortcut_info" />
+        </receiver>
+
+        <!-- 喝水「喝一杯」加水广播（仅本应用自身触发，不导出） -->
+        <receiver
+            android:name=".WaterAddCupReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.weighttracker.app.ACTION_ADD_WATER" />
+            </intent-filter>
         </receiver>
     </application>
 

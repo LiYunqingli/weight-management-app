@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_water"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:id="@+id/w_col"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="top">
+
+        <!-- 标题行：喝水追踪 + 更新时间 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/w_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="喝水追踪"
+                android:textColor="#8fc7bd"
+                android:textSize="10sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/w_footer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#6fa79c"
+                android:textSize="9sp" />
+        </LinearLayout>
+
+        <!-- 主数据行：今日 ml 大数字 + 单位 + 杯数 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="bottom"
+            android:layout_marginTop="6dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/w_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#eafbf8"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/w_unit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ml"
+                    android:textColor="#8fc7bd"
+                    android:textSize="11sp"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/w_cups"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 杯"
+                android:textColor="#8fc7bd"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 目标进度行 -->
+        <LinearLayout
+            android:id="@+id/w_progress_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <ProgressBar
+                android:id="@+id/w_progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="4dp"
+                android:layout_weight="1"
+                android:max="100"
+                android:progress="0" />
+
+            <TextView
+                android:id="@+id/w_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#34cdb8"
+                android:textSize="10sp"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- 喝一杯 按钮 -->
+        <LinearLayout
+            android:id="@+id/w_add_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:id="@+id/w_add"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:background="@drawable/widget_btn_water"
+                android:gravity="center"
+                android:text="喝一杯"
+                android:textColor="#06302a"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

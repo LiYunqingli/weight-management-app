@@ -58,6 +58,58 @@ public class WidgetBridgePlugin extends Plugin {
   }
 
   @PluginMethod
+  public void updateWaterWidget(PluginCall call) {
+    Context ctx = getContext();
+    if (ctx == null) {
+      call.resolve();
+      return;
+    }
+    SharedPreferences sp = ctx.getSharedPreferences("water_widget", Context.MODE_PRIVATE);
+    SharedPreferences.Editor ed = sp.edit();
+    ed.putString("w_total", call.getString("todayTotal", ""));
+    ed.putInt("w_cups", call.getInt("cups", 0));
+    ed.putString("w_goal", call.getString("goal", ""));
+    ed.putInt("w_progress", call.getInt("progress", -1));
+    ed.putString("w_cup_ml", call.getString("cupMl", ""));
+    ed.putString("w_updated", call.getString("updatedAt", ""));
+    ed.putString("w_date", call.getString("date", ""));
+    ed.apply();
+
+    // 数据变了，立即刷新已放置的喝水小组件（任何异常都不能中断插件调用或拖垮宿主 App）
+    try {
+      WaterWidgetProvider.pushUpdate(ctx);
+      WaterShortcutWidgetProvider.pushUpdate(ctx);
+    } catch (Throwable ignored) {
+    }
+    call.resolve();
+  }
+
+  /** 取出并清零「桌面快捷加水」待回写杯数（由 Web 读走后写入 IndexedDB） */
+  @PluginMethod
+  public void consumePendingCups(PluginCall call) {
+    Context ctx = getContext();
+    JSObject ret = new JSObject();
+    int cups = 0;
+    if (ctx != null) {
+      SharedPreferences sp = ctx.getSharedPreferences("water_widget", Context.MODE_PRIVATE);
+      cups = sp.getInt("w_pending", 0);
+    }
+    ret.put("cups", cups);
+    call.resolve(ret);
+  }
+
+  /** 成功写入 IndexedDB 后，由 Web 调用以清空待回写计数 */
+  @PluginMethod
+  public void clearPendingCups(PluginCall call) {
+    Context ctx = getContext();
+    if (ctx != null) {
+      SharedPreferences sp = ctx.getSharedPreferences("water_widget", Context.MODE_PRIVATE);
+      sp.edit().putInt("w_pending", 0).apply();
+    }
+    call.resolve();
+  }
+
+  @PluginMethod
   public void getLaunchAction(PluginCall call) {
     JSObject ret = new JSObject();
     ret.put("tab", pendingTab == null ? "" : pendingTab);
